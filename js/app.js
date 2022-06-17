@@ -1,8 +1,10 @@
 
+
 let isEdit = 0;
 let idSubTaskTmp = 0;
 const container = document.querySelector("#container");
 const txtSuperTitle = document.createElement("h1");
+
 
 txtSuperTitle.textContent = "Lista tareas!!";
 container.append(txtSuperTitle);
@@ -58,6 +60,8 @@ const getSubTaskID = async (idTask, task) => {
     inputSubTask.textContent = '';
 
 
+
+
     const btnCrearSubTarea = document.createElement("button");
     btnCrearSubTarea.classList.add('btn', 'btn-primary', 'btnIndex', 'createSubTask');
     btnCrearSubTarea.textContent = "Crear sub-tarea";
@@ -74,6 +78,7 @@ const getSubTaskID = async (idTask, task) => {
     titleSubtask.textContent = idTask + " - " + task;
 
     divCardHeader.append(inputSubTask, btnCrearSubTarea, titleSubtask, btnDeleteTask);
+
 
     const divCardBody = document.createElement("div");
     divCardBody.classList.add('card-body');
@@ -107,6 +112,8 @@ const getSubTaskID = async (idTask, task) => {
 
     const tbody = document.createElement("tbody");
 
+
+
     json.forEach(element => {
 
         const trBody = document.createElement("tr");
@@ -123,31 +130,36 @@ const getSubTaskID = async (idTask, task) => {
 
         const btnEditar = document.createElement("button");
         const btnEliminar = document.createElement("button");
+        const btnCompletar = document.createElement("button");
         const spanTmp = document.createElement("span");
         spanTmp.className = idTask;
 
-        const check = document.createElement("input");
-        check.setAttribute("type", "checkbox");
-        check.classList.add("complet");
-        check.setAttribute("id", "check" + element.id);
 
         const spanTmpCheck = document.createElement("span");
         spanTmpCheck.className = element.id;
 
         btnEditar.classList.add('edit');
         btnEliminar.classList.add('delete');
+        btnCompletar.classList.add('complet');
 
         btnEditar.dataset.idTask = element.id;
         btnEditar.dataset.description = element.description;
         btnEliminar.dataset.idTask = element.id;
 
+        btnCompletar.dataset.idTask = idTask;
+        btnCompletar.dataset.complet = element.complet;
+
         btnEditar.textContent = "Editar";
         btnEliminar.textContent = "Eliminar";
+        console.log("completado ", element.complet);
+        (element.complet) ? btnCompletar.textContent = "Completado" : btnCompletar.textContent = "Completar"
+
+
 
         tdEditar.append(spanTmp);
         tdEditar.appendChild(btnEditar);
         tdEliminar.appendChild(btnEliminar);
-        tdCompletado.append(spanTmpCheck,check);
+        tdCompletado.append(btnCompletar);
 
         trBody.append(tdBodyId, tdBodyDescription, tdEditar, tdEliminar, tdCompletado);
         tbody.append(trBody);
@@ -164,55 +176,64 @@ loadTask();
 
 document.addEventListener("click", async e => {
     e.preventDefault();
-
-    if (e.target.matches(".createSubTask")) {
-        if (isEdit !== 0) {
-            try {
-                let options = {
-                    method: "POST",
-                    headers: {
-                        "Content-type": "application/json; charset=utf-8"
-                    },
-                    data: JSON.stringify({
-                        id: idSubTaskTmp,
-                        description: e.target.previousElementSibling.value,
-                        task: {
-                            id: isEdit,
-                            description: e.target.dataset.task
-                        }
-                    })
-                },
-                    res = await axios("http://localhost:8080/subtask", options),
-                    json = await res.data;
-                location.reload();
-            } catch (error) {
-                let message = error.statusText || "Ocurrio un error";
-                alert(message);
+   
+        if (e.target.matches(".createSubTask")) {
+            if(e.target.previousElementSibling.value ===""){
+                alert("Ingrese");
+            }else{
+                if (isEdit !== 0) {
+                    try {
+                        let options = {
+                            method: "POST",
+                            headers: {
+                                "Content-type": "application/json; charset=utf-8"
+                            },
+                            data: JSON.stringify({
+                                id: idSubTaskTmp,
+                                description: e.target.previousElementSibling.value,
+                                complet: false,
+                                task: {
+                                    id: isEdit,
+                                    description: e.target.dataset.task
+                                }
+                            })
+                        },
+                            res = await axios("http://localhost:8080/subtask", options),
+                            json = await res.data;
+                        location.reload();
+                    } catch (error) {
+                        let message = error.statusText || "Ocurrio un error";
+                        alert(message);
+                    }
+                } else {
+                    try {
+                        let options = {
+                            method: "POST",
+                            headers: {
+                                "Content-type": "application/json; charset=utf-8"
+                            },
+                            data: JSON.stringify({
+                                description: e.target.previousElementSibling.value,
+                                complet: false,
+                                task: {
+                                    id: e.target.dataset.id,
+                                    description: e.target.dataset.task
+                                }
+                            })
+                        },
+                            res = await axios("http://localhost:8080/subtask", options),
+                            json = await res.data;
+                        location.reload();
+                    } catch (error) {
+                        let message = error.statusText || "Ocurrio un error";
+                        alert(message);
+                    }
+                }
             }
-        } else {
-            try {
-                let options = {
-                    method: "POST",
-                    headers: {
-                        "Content-type": "application/json; charset=utf-8"
-                    },
-                    data: JSON.stringify({
-                        description: e.target.previousElementSibling.value,
-                        task: {
-                            id: e.target.dataset.id,
-                            description: e.target.dataset.task
-                        }
-                    })
-                },
-                    res = await axios("http://localhost:8080/subtask", options),
-                    json = await res.data;
-                location.reload();
-            } catch (error) {
-                let message = error.statusText || "Ocurrio un error";
-                alert(message);
-            }
+          
         }
-    }
+
+    
     if (e.target.matches(".edit")) {
 
         const idTaskTmp = e.target.previousElementSibling.className;
@@ -269,36 +290,54 @@ document.addEventListener("click", async e => {
                 alert(message);
             }
         }
-
     }
     if (e.target.matches(".complet")) {
-        const idSubTaskTmp = e.target.previousElementSibling.className;
-        console.log(idSubTaskTmp);
-        const checkt = document.querySelector("#check" + idSubTaskTmp);
-        checkt.setAttribute('checked',true);
-        
+
+        console.log(e.target);
+        const idSubtask = e.target.parentElement.parentElement.children[0].textContent;
+        const complet = (e.target.dataset.complet) === "true" ? false : true;
+        console.log(idSubtask, complet);
+        try {
+            let options = {
+                method: "GET",
+                headers: {
+                    "Content-type": "application/json; charset=utf-8"
+                }
+            },
+                res = await axios(`http://localhost:8080/subtask/subtaskcomplet?idsubtask=${idSubtask}&complet=${complet}`, options),
+                json = await res.data;
+            location.reload();
+        } catch (error) {
+            let message = error.statusText || "Ocurrio un error";
+            alert(message);
+        }
     }
 })
 
 
 btnCrearTarea.addEventListener('click', async (e) => {
-    try {
-        let options = {
-            method: "POST",
-            headers: {
-                "Content-type": "application/json; charset=utf-8"
+    if (inputTask.value === "") {
+        alert("Por favor diligencie el campo tarea");
+    } else {
+        try {
+            let options = {
+                method: "POST",
+                headers: {
+                    "Content-type": "application/json; charset=utf-8"
+                },
+                data: JSON.stringify({
+                    description: inputTask.value
+                })
             },
-            data: JSON.stringify({
-                description: inputTask.value
-            })
-        },
-            res = await axios("http://localhost:8080/task", options),
-            json = await res.data;
-        location.reload();
-    } catch (error) {
-        let message = error.statusText || "Ocurrio un error";
-        alert(message);
+                res = await axios("http://localhost:8080/task", options),
+                json = await res.data;
+            location.reload();
+        } catch (error) {
+            let message = error.statusText || "Ocurrio un error";
+            alert(message);
+        }
     }
+
 });
 
 
