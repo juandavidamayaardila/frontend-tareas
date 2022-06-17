@@ -36,7 +36,7 @@ const loadTask = async () => {
         getSubTaskID(task.id, task.description);
 
     });
-}
+};
 
 
 const getSubTaskID = async (idTask, task) => {
@@ -90,11 +90,12 @@ const getSubTaskID = async (idTask, task) => {
     const thDescripcionSubtask = document.createElement("th");
     const thEditar = document.createElement("th");
     const thEliminar = document.createElement("th");
+    const thCompletado = document.createElement("th");
 
     thIdSubtask.classList.add('col');
     thDescripcionSubtask.classList.add('col');
 
-    trHead.append(thIdSubtask, thDescripcionSubtask, thEditar, thEliminar);
+    trHead.append(thIdSubtask, thDescripcionSubtask, thEditar, thEliminar, thCompletado);
     thead.append(trHead);
     table.appendChild(thead);
 
@@ -102,6 +103,7 @@ const getSubTaskID = async (idTask, task) => {
     thDescripcionSubtask.textContent = "Descripcion";
     thEditar.textContent = "Editar";
     thEliminar.textContent = "Eliminar";
+    thCompletado.textContent = "Completado";
 
     const tbody = document.createElement("tbody");
 
@@ -114,6 +116,7 @@ const getSubTaskID = async (idTask, task) => {
         const tdBodyDescription = document.createElement("td");
         const tdEditar = document.createElement("td");
         const tdEliminar = document.createElement("td");
+        const tdCompletado = document.createElement("td");
 
         tdBodyId.textContent = element.id;
         tdBodyDescription.textContent = element.description;
@@ -123,6 +126,13 @@ const getSubTaskID = async (idTask, task) => {
         const spanTmp = document.createElement("span");
         spanTmp.className = idTask;
 
+        const check = document.createElement("input");
+        check.setAttribute("type", "checkbox");
+        check.classList.add("complet");
+        check.setAttribute("id", "check" + element.id);
+
+        const spanTmpCheck = document.createElement("span");
+        spanTmpCheck.className = element.id;
 
         btnEditar.classList.add('edit');
         btnEliminar.classList.add('delete');
@@ -137,8 +147,9 @@ const getSubTaskID = async (idTask, task) => {
         tdEditar.append(spanTmp);
         tdEditar.appendChild(btnEditar);
         tdEliminar.appendChild(btnEliminar);
+        tdCompletado.append(spanTmpCheck,check);
 
-        trBody.append(tdBodyId, tdBodyDescription, tdEditar, tdEliminar);
+        trBody.append(tdBodyId, tdBodyDescription, tdEditar, tdEliminar, tdCompletado);
         tbody.append(trBody);
     });
 
@@ -234,28 +245,37 @@ document.addEventListener("click", async e => {
         }
     }
     if (e.target.matches(".deleteTask")) {
-       
-        
+
+
         const confirmAnswer = confirm("Desea eliminar esta tarea");
         if (confirmAnswer) {
             const idTareaDel = e.target.dataset.id;
             console.log(idTareaDel);
-            
+
             try {
                 let options = {
                     method: "DELETE",
                     headers: {
-                        "Content-type": "application/json; charset=utf-8"
+                        "Content-type": "application/json; charset=utf-8",
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
                     }
                 },
-                    res = await axios("http://localhost:8080/subtask/deletetask?idtask=" + idTareaDel, options),
+                    res = await axios("http://localhost:8080/task/deletetask?idtask=" + idTareaDel, options),
                     json = await res.data;
                 location.reload();
             } catch (error) {
                 let message = error.statusText || "Ocurrio un error";
                 alert(message);
-            } 
+            }
         }
+
+    }
+    if (e.target.matches(".complet")) {
+        const idSubTaskTmp = e.target.previousElementSibling.className;
+        console.log(idSubTaskTmp);
+        const checkt = document.querySelector("#check" + idSubTaskTmp);
+        checkt.setAttribute('checked',true);
         
     }
 })
