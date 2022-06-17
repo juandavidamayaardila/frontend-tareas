@@ -1,0 +1,26 @@
+
+
+.divTarea{
+    padding-bottom: 10px;
+}
+
+.createTarea{
+    width: 140px;
+}
+
+.createSubTask{
+    width: 140px;
+}
+
+.complet{
+    height: 25px;
+    font-size: 11px;
+}
+
+.edit {
+    height: 20px;
+}
+
+.delete {
+    height: 20px;
+}

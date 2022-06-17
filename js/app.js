@@ -10,6 +10,14 @@ txtSuperTitle.textContent = "Lista tareas!!";
 container.append(txtSuperTitle);
 
 const divCreateList = document.createElement("div");
+const divCreateListMain = document.createElement("div");
+divCreateListMain.classList.add("row", "divTarea");
+
+const divCreateListBody = document.createElement("div");
+divCreateListBody.classList.add("col-6");
+
+const divCreateListBodyBotton = document.createElement("div");
+divCreateListBodyBotton.classList.add("col-6");
 
 const inputTask = document.createElement("input");
 inputTask.classList.add('form-control', 'inputIdex');
@@ -20,19 +28,25 @@ const btnCrearTarea = document.createElement("button");
 btnCrearTarea.classList.add('btn', 'btn-success', 'btnIndex', 'createTarea');
 btnCrearTarea.textContent = "Crear tarea";
 
-divCreateList.append(txtSuperTitle, inputTask, btnCrearTarea);
+divCreateListBody.append(inputTask);
+divCreateListBodyBotton.append(btnCrearTarea);
+
+divCreateListMain.append(divCreateListBody, divCreateListBodyBotton);
+
+divCreateList.append(txtSuperTitle, divCreateListMain);
 container.append(divCreateList);
 
 
 /**creamos la tabla para mostrar las listas */
-
-
 const loadTask = async () => {
 
     const respTask = await axios.get("http://localhost:8080/task"),
         jsonTask = await respTask.data;
+    //console.log("prueba",jsonTask);
+    const listOrdenada = jsonTask.sort((x,y) => x.id - y.id);
+    console.log("orden ",listOrdenada);
 
-    jsonTask.forEach(task => {
+    jsonTask.sort((x,y) => x.id - y.id).forEach(task => {
         console.log(task);
 
         getSubTaskID(task.id, task.description);
@@ -40,12 +54,11 @@ const loadTask = async () => {
     });
 };
 
-
 const getSubTaskID = async (idTask, task) => {
     const respSubTas = await axios.get("http://localhost:8080/subtask/buscarsubtask?idtask=" + idTask),
         json = await respSubTas.data;
 
-    console.log(json);
+    console.log("sub",json);
 
     const divCardMain = document.createElement("div");
     divCardMain.classList.add('card', 'text-white', 'bg-secondary', 'mb-3');
@@ -53,14 +66,23 @@ const getSubTaskID = async (idTask, task) => {
     const divCardHeader = document.createElement("div");
     divCardHeader.classList.add('card-header');
 
+    const divCreateSubMain = document.createElement("div");
+    divCreateSubMain.classList.add("row");
+
+    const divCreateSubBody = document.createElement("div");
+    divCreateSubBody.classList.add("col-6");
+
+    const divCreateSubBotton = document.createElement("div");
+    divCreateSubBotton.classList.add("col-6");
+
     const inputSubTask = document.createElement("input");
     inputSubTask.classList.add('form-control', 'inputIdex', 'input' + idTask);
     inputSubTask.setAttribute("placeholder", "Nueva sub tarea");
     inputSubTask.setAttribute("id", "inputSubtask" + idTask);
     inputSubTask.textContent = '';
 
-
-
+    const spanTask = document.createElement("span");
+    spanTask.className = idTask;
 
     const btnCrearSubTarea = document.createElement("button");
     btnCrearSubTarea.classList.add('btn', 'btn-primary', 'btnIndex', 'createSubTask');
@@ -73,17 +95,16 @@ const getSubTaskID = async (idTask, task) => {
     btnDeleteTask.textContent = "Eliminar Tarea";
     btnDeleteTask.dataset.id = idTask;
 
-
     const titleSubtask = document.createElement("h3");
     titleSubtask.textContent = idTask + " - " + task;
 
-    divCardHeader.append(inputSubTask, btnCrearSubTarea, titleSubtask, btnDeleteTask);
+    divCreateSubBody.append(inputSubTask, spanTask);
+    divCreateSubBotton.append(btnCrearSubTarea);
+    divCreateSubMain.append(divCreateSubBody, divCreateSubBotton);
+
+    divCardHeader.append(divCreateSubMain, titleSubtask, btnDeleteTask);
 
 
-    const divCardBody = document.createElement("div");
-    divCardBody.classList.add('card-body');
-
-    divCardHeader.appendChild(divCardBody);
     divCardMain.appendChild(divCardHeader);
 
     const table = document.createElement("table");
@@ -112,8 +133,6 @@ const getSubTaskID = async (idTask, task) => {
 
     const tbody = document.createElement("tbody");
 
-
-
     json.forEach(element => {
 
         const trBody = document.createElement("tr");
@@ -131,9 +150,24 @@ const getSubTaskID = async (idTask, task) => {
         const btnEditar = document.createElement("button");
         const btnEliminar = document.createElement("button");
         const btnCompletar = document.createElement("button");
+
+
+        const btnEditarImg = document.createElement("input");
+        btnEditarImg.setAttribute("type", "image")
+        btnEditarImg.setAttribute("src", "imges/edit1.png");
+        btnEditarImg.classList.add('edit');
+        btnEditarImg.dataset.idTask = element.id;
+        btnEditarImg.dataset.description = element.description;
+
+        const btnDeleteImg = document.createElement("input");
+        btnDeleteImg.setAttribute("type", "image")
+        btnDeleteImg.setAttribute("src", "imges/clean.png");
+        btnDeleteImg.classList.add('delete');
+        btnDeleteImg.dataset.idTask = element.id;
+
+
         const spanTmp = document.createElement("span");
         spanTmp.className = idTask;
-
 
         const spanTmpCheck = document.createElement("span");
         spanTmpCheck.className = element.id;
@@ -141,6 +175,7 @@ const getSubTaskID = async (idTask, task) => {
         btnEditar.classList.add('edit');
         btnEliminar.classList.add('delete');
         btnCompletar.classList.add('complet');
+
 
         btnEditar.dataset.idTask = element.id;
         btnEditar.dataset.description = element.description;
@@ -151,14 +186,18 @@ const getSubTaskID = async (idTask, task) => {
 
         btnEditar.textContent = "Editar";
         btnEliminar.textContent = "Eliminar";
-        console.log("completado ", element.complet);
-        (element.complet) ? btnCompletar.textContent = "Completado" : btnCompletar.textContent = "Completar"
-
-
+       
+        if (element.complet) {
+            btnCompletar.classList.add('btn', 'btn-success');
+            btnCompletar.textContent = "Completado";
+        } else {
+            btnCompletar.textContent = "Completar";
+            btnCompletar.classList.add('btn', 'btn-secondary');
+        }
 
         tdEditar.append(spanTmp);
-        tdEditar.appendChild(btnEditar);
-        tdEliminar.appendChild(btnEliminar);
+        tdEditar.append(btnEditarImg);
+        tdEliminar.appendChild(btnDeleteImg);
         tdCompletado.append(btnCompletar);
 
         trBody.append(tdBodyId, tdBodyDescription, tdEditar, tdEliminar, tdCompletado);
@@ -175,65 +214,68 @@ const getSubTaskID = async (idTask, task) => {
 loadTask();
 
 document.addEventListener("click", async e => {
-    e.preventDefault();
-   
-        if (e.target.matches(".createSubTask")) {
-            if(e.target.previousElementSibling.value ===""){
-                alert("Ingrese");
-            }else{
-                if (isEdit !== 0) {
-                    try {
-                        let options = {
-                            method: "POST",
-                            headers: {
-                                "Content-type": "application/json; charset=utf-8"
-                            },
-                            data: JSON.stringify({
-                                id: idSubTaskTmp,
-                                description: e.target.previousElementSibling.value,
-                                complet: false,
-                                task: {
-                                    id: isEdit,
-                                    description: e.target.dataset.task
-                                }
-                            })
+
+
+    if (e.target.matches(".createSubTask")) {
+        e.preventDefault();
+        console.log("jd" + e.target.dataset.id);
+        const idTask = e.target.dataset.id;
+        const inputTmp = document.querySelector("#inputSubtask" + idTask);
+        const txtImput = inputTmp.value;
+        if (txtImput === "") {
+            alert("Por favor complete el nombre de la tarea");
+        } else {
+            if (isEdit !== 0) {
+                try {
+                    let options = {
+                        method: "POST",
+                        headers: {
+                            "Content-type": "application/json; charset=utf-8"
                         },
-                            res = await axios("http://localhost:8080/subtask", options),
-                            json = await res.data;
-                        location.reload();
-                    } catch (error) {
-                        let message = error.statusText || "Ocurrio un error";
-                        alert(message);
-                    }
-                } else {
-                    try {
-                        let options = {
-                            method: "POST",
-                            headers: {
-                                "Content-type": "application/json; charset=utf-8"
-                            },
-                            data: JSON.stringify({
-                                description: e.target.previousElementSibling.value,
-                                complet: false,
-                                task: {
-                                    id: e.target.dataset.id,
-                                    description: e.target.dataset.task
-                                }
-                            })
+                        data: JSON.stringify({
+                            id: idSubTaskTmp,
+                            description: txtImput,
+                            complet: false,
+                            task: {
+                                id: isEdit,
+                                description: e.target.dataset.task
+                            }
+                        })
+                    },
+                        res = await axios("http://localhost:8080/subtask", options),
+                        json = await res.data;
+                    location.reload();
+                } catch (error) {
+                    let message = error.statusText || "Ocurrio un error";
+                    alert(message);
+                }
+            } else {
+                try {
+                    let options = {
+                        method: "POST",
+                        headers: {
+                            "Content-type": "application/json; charset=utf-8"
                         },
-                            res = await axios("http://localhost:8080/subtask", options),
-                            json = await res.data;
-                        location.reload();
-                    } catch (error) {
-                        let message = error.statusText || "Ocurrio un error";
-                        alert(message);
-                    }
+                        data: JSON.stringify({
+                            description: txtImput,
+                            complet: false,
+                            task: {
+                                id: e.target.dataset.id,
+                                description: e.target.dataset.task
+                            }
+                        })
+                    },
+                        res = await axios("http://localhost:8080/subtask", options),
+                        json = await res.data;
+                    location.reload();
+                } catch (error) {
+                    let message = error.statusText || "Ocurrio un error";
+                    alert(message);
                 }
             }
-          
         }
 
-    
+    }
     if (e.target.matches(".edit")) {
 
         const idTaskTmp = e.target.previousElementSibling.className;
@@ -266,9 +308,7 @@ document.addEventListener("click", async e => {
         }
     }
     if (e.target.matches(".deleteTask")) {
-
-
-        const confirmAnswer = confirm("Desea eliminar esta tarea");
+        const confirmAnswer = confirm("Desea eliminar esta tarea, se eliminaran todas las subtareas");
         if (confirmAnswer) {
             const idTareaDel = e.target.dataset.id;
             console.log(idTareaDel);
