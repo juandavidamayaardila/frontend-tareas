@@ -215,10 +215,13 @@ loadTask();
 
 document.addEventListener("click", async e => {
 
-
     if (e.target.matches(".createSubTask")) {
         e.preventDefault();
-        console.log("jd" + e.target.dataset.id);
+        /**
+         * Obtenemos los valores para hacer la acción,
+         * con el mismo boton sabemos si esta editando o 
+         * creando un elemento nuevo
+         */
         const idTask = e.target.dataset.id;
         const inputTmp = document.querySelector("#inputSubtask" + idTask);
         const txtImput = inputTmp.value;
@@ -276,10 +279,12 @@ document.addEventListener("click", async e => {
         }
 
     }
+    /**
+     * Cargamos los valores en el input.
+     */
     if (e.target.matches(".edit")) {
 
         const idTaskTmp = e.target.previousElementSibling.className;
-        console.log(idTaskTmp);
         const inputTmp = document.querySelector("#inputSubtask" + idTaskTmp);
         inputTmp.value = e.target.dataset.description;
         console.log(e.target.dataset.idTask);
@@ -332,8 +337,6 @@ document.addEventListener("click", async e => {
         }
     }
     if (e.target.matches(".complet")) {
-
-        console.log(e.target);
         const idSubtask = e.target.parentElement.parentElement.children[0].textContent;
         const complet = (e.target.dataset.complet) === "true" ? false : true;
         console.log(idSubtask, complet);
@@ -353,7 +356,6 @@ document.addEventListener("click", async e => {
         }
     }
 })
-
 
 btnCrearTarea.addEventListener('click', async (e) => {
     if (inputTask.value === "") {
@@ -377,7 +379,6 @@ btnCrearTarea.addEventListener('click', async (e) => {
             alert(message);
         }
     }
-
 });
 
 
